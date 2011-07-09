@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>ColorPicker example</title>
+<link rel="stylesheet" type="text/css" href="../resources/css/ext-all-gray.css">
+<link rel="stylesheet" type="text/css" href="../resources/css/colorpicker.css">
+<script type="text/javascript" src="../ext-all.js"></script>
+
+<script type="text/javascript">
+	Ext.Loader.setConfig({
+		enabled : true,
+		disableCaching : true
+	});
+
+	Ext.Loader.setPath({
+		'Ext' : '../src'
+	});
+
+	Ext.require(['Ext.ux.colorpicker.ColorPicker', 'Ext.ux.colorpicker.ColorPickerField']);
+
+	Ext.applyIfChanged = function(object, config){
+		var property;
+		if (object) {
+			for (property in config) {
+				if (object[property] === undefined) {
+					object[property] = config[property];
+				} else {
+					if(object[property] !== config[property]) {
+						object[property] = config[property]
+					}
+				}
+			}
+		}
+		return object;
+	};
+	
+	Ext.onReady(function() {
+		Ext.tip.QuickTipManager.init();
+		
+		var picker = Ext.widget('ux.colorpicker', {
+			renderTo : Ext.getBody()			
+		});
+		
+		var field = Ext.widget('colorpickerfield', {
+			renderTo : Ext.getBody()
+		});
+	});
+</script>
+</head>
+
+<body>
+</body>
+</html>

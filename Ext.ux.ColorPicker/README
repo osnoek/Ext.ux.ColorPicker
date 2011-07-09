@@ -1,0 +1,17 @@
+An advanced colorpicker for the Extjs framework.
+
+Simply drop the files into the root of an ExtJs 4.x install folder.
+
+An example page can be found in: INSTALL_DIR/examples/colorpicker.html
+
+usage : 
+To create the colorpicker panel:
+var colorpicker = Ext.widget('ux.colorpicker', {
+	renderTo : Ext.getBody()
+});
+
+To create a colorpickerfield : 
+var colorpicker = Ext.widget('ux.colorpickerfield', {
+	renderTo : Ext.getBody(),
+	value : '#000000'
+});
