@@ -216,7 +216,7 @@ Ext.define('Ext.ux.colorpicker.ColorPicker', {
 	},
 
 	inverseClick : function() {
-		this.setColor(this.invert(this.getColor()));
+		this.setColor(this.rgbToHex(this.invert(this.getColor())));
 	},
 
 	selectClick : function() {
@@ -226,7 +226,8 @@ Ext.define('Ext.ux.colorpicker.ColorPicker', {
 	},
 
 	getColor : function() {
-		return me.hsvToRgb(this.getHsv());
+		var me = this, hsv = me.getHsv();
+		return me.hsvToRgb(hsv);
 	},
 
 	setValue : function(v) {
@@ -260,8 +261,8 @@ Ext.define('Ext.ux.colorpicker.ColorPicker', {
 	hsvChange : function(input) {
 		this.updateColor({
 			h : this.down('#iHue').getValue(),
-			s : this.down('#iSat').getValue() / 100,
-			v : this.down('#iVal').getValue() / 100
+			s : this.down('#iSat').getValue(),
+			v : this.down('#iVal').getValue()
 		});
 	},
 
@@ -270,14 +271,11 @@ Ext.define('Ext.ux.colorpicker.ColorPicker', {
 	},
 
 	hueClick : function(event, el) {
-		var me = this;
-		me.updateMode = 'click';
-		me.moveHuePicker(event.getXY()[1] - me.down('#cHue').getEl().getTop());
+		this.moveHuePicker(event.getXY()[1] - this.down('#cHue').getEl().getTop());
 	},
 
 	rgbClick : function(event, el) {
 		var me = this, cRgb = me.down('#cRgb').getEl();
-		me.updateMode = 'click';
 		me.moveRgbPicker(event.getXY()[0] - cRgb.getLeft(), event.getXY()[1] - cRgb.getTop());
 	},
 
@@ -285,26 +283,27 @@ Ext.define('Ext.ux.colorpicker.ColorPicker', {
 		var hsv = this.getHsv(), hp = this.down('#huePicker').getEl();
 		hsv.h = Math.round(360 / 181 * (181 - y));
 		hp.moveTo(hp.getLeft(), this.down('#cHue').getEl().getTop() + y - 7, true);
-		this.updateRgbPicker(hsv.h);
 		this.updateColor(hsv);
 	},
 
 	updateRgbPicker : function(newValue) {
 		this.down('#cRgb').getEl().applyStyles({
-			'backgroundColor' : '#' + this.rgbToHex(this.hsvToRgb({ h: newValue, s:1, v:1 }))
+			'backgroundColor' : '#' + this.rgbToHex(this.hsvToRgb({ h: newValue, s:100, v:100 }))
 		});
 	},
 
 	moveRgbPicker : function(x, y) {
-		var me = this, hsv = me.getHsv(), cRgb = me.down('#cRgb').getEl();
-		hsv.s = me.getSaturation(x);
-		hsv.v = me.getVal(y);
-		me.down('#rgbPicker').getEl().moveTo(cRgb.getLeft() + x - 7, cRgb.getTop() + y - 7, true);
-		me.updateColor();
+		var hsv = this.getHsv(), cRgb = this.down('#cRgb').getEl();
+		hsv.s = this.getSaturation(x) * 100;
+		hsv.v = this.getVal(y) * 100;
+		this.down('#rgbPicker').getEl().moveTo(cRgb.getLeft() + x - 7, cRgb.getTop() + y - 7, true);
+		this.updateColor();
 	},
 
 	updateColor : function(color) {
-		var rgb, hsv, invert, websafe;
+		var cRgb = this.down('#cRgb').getEl(), cHue = this.down('#cHue').getEl(), hp = this.down('#huePicker').getEl(),
+				rgb, hsv, invert, websafe;
+
 		color = (Ext.isEmpty(color) ? this.getHsv() : color);
 		if (Ext.isEmpty(color.h)) {
 			rgb = color;
@@ -315,24 +314,22 @@ Ext.define('Ext.ux.colorpicker.ColorPicker', {
 		}
 		invert = this.invert(rgb);
 		websafe = this.websafe(rgb);
-
+		this.hsv = hsv;
+		this.updateRgbPicker(hsv.h);
 		this.down('#iHexa').setValue(this.rgbToHex(rgb));
 		this.down('#iRed').setValue(rgb.r);
 		this.down('#iGreen').setValue(rgb.g);
 		this.down('#iBlue').setValue(rgb.b);
 		this.down('#iHue').setValue(Math.round(hsv.h));
-		this.down('#iSat').setValue(Math.round(hsv.s * 100));
-		this.down('#iVal').setValue(Math.round(hsv.v * 100));
+		this.down('#iSat').setValue(Math.round(hsv.s));
+		this.down('#iVal').setValue(Math.round(hsv.v));
 		this.setButtonColor('#cWebsafe', websafe);
 		this.setButtonColor('#cInverse', invert);
 		this.setButtonColor('#cSelect',  rgb);
 
-		if (this.updateMode != 'click') {
-			var cRgb = this.down('#cRgb').getEl(), cHue = this.down('#cHue').getEl(), hp = this.down('#huePicker').getEl();
-			hp.moveTo(hp.getLeft(), cHue.getTop() + this.getHPos(this.down('#iHue').getValue()) - 7, true);
-			this.down('#rgbPicker').getEl().moveTo(cRgb.getLeft() + this.getSPos(this.down('#iSat').getValue() / 100) - 7,
-					cHue.getTop() + this.getVPos(this.down('#iVal').getValue() / 100) - 7, true);
-		}
+		hp.moveTo(hp.getLeft(), cHue.getTop() + this.getHPos(this.down('#iHue').getValue()) - 7, true);
+		this.down('#rgbPicker').getEl().moveTo(cRgb.getLeft() + this.getSPos(this.down('#iSat').getValue() / 100) - 7,
+			cHue.getTop() + this.getVPos(this.down('#iVal').getValue() / 100) - 7, true);
 	},
 
 	setButtonColor : function(id, rgb) {
@@ -366,37 +363,38 @@ Ext.define('Ext.ux.colorpicker.ColorPicker', {
 	},
 
 	hsvToRgb : function(hsv) {
-		var r, g, b, i, f, p, q, t;
-		i = Math.floor((hsv.h / 60) % 6);
-		f = (hsv.h / 60) - i;
-		p = hsv.v * (1 - hsv.s);
-		q = hsv.v * (1 - f * hsv.s);
-		t = hsv.v * (1 - (1 - f) * hsv.s);
-		switch (i) {
-		case 0:
-			r = hsv.v, g = t, b = p;
-			break;
-		case 1:
-			r = q, g = hsv.v, b = p;
-			break;
-		case 2:
-			r = p, g = hsv.v, b = t;
-			break;
-		case 3:
-			r = p, g = q, b = hsv.v;
-			break;
-		case 4:
-			r = t, g = p, b = hsv.v;
-			break;
-		case 5:
-			r = hsv.v, g = p, b = q;
-			break;
+		var result = { r: 0, g: 0, b: 0 };
+		var h = hsv.h / 360;
+		var s = hsv.s / 100;
+		var v = hsv.v / 100;
+
+		if (s == 0) {
+			result.r = v * 255;
+			result.g = v * 255;
+			result.v = v * 255;
+		} else {
+			var_h = h * 6;
+			var_i = Math.floor(var_h);
+			var_1 = v * (1 - s);
+			var_2 = v * (1 - s * (var_h - var_i));
+			var_3 = v * (1 - s * (1 - (var_h - var_i)));
+
+			if (var_i == 0) {var_r = v; var_g = var_3; var_b = var_1}
+			else if (var_i == 1) {var_r = var_2; var_g = v; var_b = var_1}
+			else if (var_i == 2) {var_r = var_1; var_g = v; var_b = var_3}
+			else if (var_i == 3) {var_r = var_1; var_g = var_2; var_b = v}
+			else if (var_i == 4) {var_r = var_3; var_g = var_1; var_b = v}
+			else {var_r = v; var_g = var_1; var_b = var_2};
+
+			result.r = var_r * 255;
+			result.g = var_g * 255;
+			result.b = var_b * 255;
+
+			result.r = Math.round(result.r);
+			result.g = Math.round(result.g);
+			result.b = Math.round(result.b);
 		}
-		return {
-			r: this.realToDec(r),
-			g: this.realToDec(g),
-			b: this.realToDec(b)
-		};
+		return result;
 	},
 	/**
 	 * Convert a float to decimal
@@ -471,34 +469,31 @@ Ext.define('Ext.ux.colorpicker.ColorPicker', {
 	},
 
 	rgbToHsv : function(rgb) {
-		r = rgb.r / 255, g = rgb.g / 255, b = rgb.b / 255;
-		var max = Math.max(r, g, b), min = Math.min(r, g, b);
-		var h, s, v = max;
+		var result = { h: 0, s:0, v:0 },r = rgb.r / 255, g = rgb.g / 255,b = rgb.b / 255, minVal = Math.min(r, g, b),
+				maxVal = Math.max(r, g, b), delta = maxVal - minVal;
 
-		var d = max - min;
-		s = max == 0 ? 0 : d / max;
+		result.v = maxVal;
 
-		if (max == min) {
-			h = 0; // achromatic
+		if (delta == 0) {
+			result.h = 0;
+			result.s = 0;
 		} else {
-			switch (max) {
-			case r:
-				h = (g - b) / d + (g < b ? 6 : 0);
-				break;
-			case g:
-				h = (b - r) / d + 2;
-				break;
-			case b:
-				h = (r - g) / d + 4;
-				break;
-			}
-			h /= 6;
+			result.s = delta / maxVal;
+			var del_R = (((maxVal - r) / 6) + (delta / 2)) / delta;
+			var del_G = (((maxVal - g) / 6) + (delta / 2)) / delta;
+			var del_B = (((maxVal - b) / 6) + (delta / 2)) / delta;
+
+			if (r == maxVal) { result.h = del_B - del_G; }
+			else if (g == maxVal) { result.h = (1 / 3) + del_R - del_B; }
+			else if (b == maxVal) { result.h = (2 / 3) + del_G - del_R; }
+
+			if (result.h < 0) { result.h += 1; }
+			if (result.h > 1) { result.h -= 1; }
 		}
 
-		return {
-			h: h,
-			s: s,
-			v: v
-		};
+		result.h = Math.round(result.h * 360);
+		result.s = Math.round(result.s * 100);
+		result.v = Math.round(result.v * 100);
+		return result;
 	}
 });
