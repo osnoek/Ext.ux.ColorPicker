@@ -176,39 +176,36 @@ Ext.define('Ext.ux.colorpicker.ColorPicker', {
 	} ],
 
 	constructor : function(config) {
-		var me = this;
-		me.initConfig(config);
-		me.addEvents('select');
-		me.callParent(arguments);
+		this.initConfig(config);
+		this.addEvents('select');
+		this.callParent(arguments);
 		return this;
 	},
 
 	afterRender : function(component) {
-		var me = this;
-		me.callParent(arguments);
-		if (me.value)
-			me.setColor(me.value);
+		this.callParent(arguments);
+		if (this.value)
+			this.setColor(this.value);
 	},
 
 	initEvents : function() {
-		var me = this;
-		me.callParent();
+		this.callParent();
 
-		me.down('#cRgb').getEl().on('mousedown', me.rgbClick, me);
-		me.down('#cHue').getEl().on('mousedown', me.hueClick, me);
+		this.down('#cRgb').getEl().on('mousedown', this.rgbClick, this);
+		this.down('#cHue').getEl().on('mousedown', this.hueClick, this);
 
-		me.down('#iHexa').on('blur', me.hexaChange, me);
-		me.down('#iRed').on('blur', me.rgbChange, me);
-		me.down('#iGreen').on('blur', me.rgbChange, me);
-		me.down('#iBlue').on('blur', me.rgbChange, me);
+		this.down('#iHexa').on('blur', this.hexaChange, this);
+		this.down('#iRed').on('blur', this.rgbChange, this);
+		this.down('#iGreen').on('blur', this.rgbChange, this);
+		this.down('#iBlue').on('blur', this.rgbChange, this);
 
-		me.down('#iHue').on('blur', me.hsvChange, me);
-		me.down('#iSat').on('blur', me.hsvChange, me);
-		me.down('#iVal').on('blur', me.hsvChange, me);
+		this.down('#iHue').on('blur', this.hsvChange, this);
+		this.down('#iSat').on('blur', this.hsvChange, this);
+		this.down('#iVal').on('blur', this.hsvChange, this);
 
-		me.down('#bWebsafe').on('click', me.websafeClick, me);
-		me.down('#bInverse').on('click', me.inverseClick, me);
-		me.down('#bSelect').on('click', me.selectClick, me);
+		this.down('#bWebsafe').on('click', this.websafeClick, this);
+		this.down('#bInverse').on('click', this.inverseClick, this);
+		this.down('#bSelect').on('click', this.selectClick, this);
 	},
 
 	websafeClick : function() {
@@ -220,14 +217,12 @@ Ext.define('Ext.ux.colorpicker.ColorPicker', {
 	},
 
 	selectClick : function() {
-		var me = this, color;
-		color = me.down('#cSelect').getEl().getColor('backgroundColor', '', '');
+		var color = this.down('#cSelect').getEl().getColor('backgroundColor', '', '');
 		this.fireEvent('select', this, color.toUpperCase());
 	},
 
 	getColor : function() {
-		var me = this, hsv = me.getHsv();
-		return me.hsvToRgb(hsv);
+		return this.hsvToRgb(this.getHsv());
 	},
 
 	setValue : function(v) {
@@ -236,13 +231,12 @@ Ext.define('Ext.ux.colorpicker.ColorPicker', {
 	},
 
 	setColor : function(c) {
-		var me = this;
-		if (me.rendered) {
+		if (this.rendered) {
 			c = c.replace('#', '');
 			if (!/^[0-9a-fA-F]{6}$/.test(c))
 				return;
-			me.down('#iHexa').setValue(c);
-			me.hexaChange();
+			this.down('#iHexa').setValue(c);
+			this.hexaChange();
 		}
 	},
 
@@ -275,8 +269,8 @@ Ext.define('Ext.ux.colorpicker.ColorPicker', {
 	},
 
 	rgbClick : function(event, el) {
-		var me = this, cRgb = me.down('#cRgb').getEl();
-		me.moveRgbPicker(event.getXY()[0] - cRgb.getLeft(), event.getXY()[1] - cRgb.getTop());
+		var cRgb = this.down('#cRgb').getEl();
+		this.moveRgbPicker(event.getXY()[0] - cRgb.getLeft(), event.getXY()[1] - cRgb.getTop());
 	},
 
 	moveHuePicker : function(y) {
@@ -333,9 +327,8 @@ Ext.define('Ext.ux.colorpicker.ColorPicker', {
 	},
 
 	setButtonColor : function(id, rgb) {
-		var me = this, dq = Ext.DomQuery, invert = me.invert(rgb);
-		me.down(id).getEl().applyStyles({
-			'background' : '#' + me.rgbToHex(rgb)
+		this.down(id).getEl().applyStyles({
+			'background' : '#' + this.rgbToHex(rgb)
 		});
 	},
 	/**
