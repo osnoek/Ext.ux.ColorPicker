@@ -353,6 +353,8 @@ Ext.define('Ext.ux.colorpicker.ColorPicker', {
 			hp.moveTo(hp.getLeft(), cHue.getTop() + me.getHPos(me.down('#iHue').getValue()) - 7, true);
 			me.down('#rgbPicker').getEl().moveTo(cRgb.getLeft() + me.getSPos(me.down('#iSat').getValue() / 100) - 7,
 					cHue.getTop() + me.getVPos(me.down('#iVal').getValue() / 100) - 7, true);
+			me.updateRgbPicker(me.down('#iHue').getValue());
+
 		}
 	},
 
@@ -523,6 +525,6 @@ Ext.define('Ext.ux.colorpicker.ColorPicker', {
 			h /= 6;
 		}
 
-		return [ h, s, v ];
+		return [ h * 360, s, v ];
 	}
 });
